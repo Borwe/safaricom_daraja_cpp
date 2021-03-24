@@ -1,0 +1,44 @@
+
+macro(setup_poco_framework)
+    find_package(Poco QUIET)
+    if(NOT ${Poco_FOUND})
+        message(STATUS "Didn't find Poco library locally, going to try github")
+        include(FetchContent)
+        FetchContent_Declare(
+            poco
+            GIT_REPOSITORY https://github.com/pocoproject/poco.git
+            GIT_TAG poco-1.10.1-release
+        )
+        FetchContent_GetProperties(Poco)
+
+        if(NOT Poco_POPULATED)
+            FetchContent_Populate(Poco)
+            set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
+            set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libs")
+
+            set(ENABLE_FOUNDATION ON)
+            set(ENABLE_ENCODINGS ON)
+            set(ENABLE_NET ON)
+            set(ENABLE_JSON ON)
+            set(ENABLE_ENCODINGS_COMPILER OFF)
+            set(ENABLE_XML OFF)
+            set(ENABLE_MONGODB OFF)
+            set(ENABLE_DATA_SQLITE OFF)
+            set(ENABLE_REDIS OFF)
+            set(ENABLE_PDF OFF)
+            set(ENABLE_UTIL OFF)
+            set(ENABLE_SEVENZIP OFF)
+            set(ENABLE_ZIP OFF)
+            set(ENABLE_CPPPARSER OFF)
+            set(ENABLE_POCODOC OFF)
+            set(ENABLE_PAGECOMPILER OFF)
+            set(ENABLE_PAGECOMPILER_FILE2PAGE OFF)
+
+            add_subdirectory(${poco_SOURCE_DIR} ${poco_BINARY_DIR})
+
+            set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} 
+                CACHE BOOL "Build shared libs")
+            message(STATUS "Poco setup done.")
+        endif()
+    endif()
+endmacro()

@@ -1,11 +1,30 @@
+include(FetchContent)
+
+macro(setup_catch2_tester)
+    find_package(Catch2 QUIET)
+    if(NOT ${Catch2_FOUND})
+        message(STATUS "Didn't find Catch2 on your system, going to try github")
+        FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG v2.13.4
+        )
+        FetchContent_GetProperties(Catch2)
+
+        if(NOT Catch2_POPULATED)
+            FetchContent_Populate(Catch2)
+
+            add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
+        endif()
+    endif()
+endmacro()
 
 macro(setup_poco_framework)
     find_package(Poco QUIET)
     if(NOT ${Poco_FOUND})
         message(STATUS "Didn't find Poco library locally, going to try github")
-        include(FetchContent)
         FetchContent_Declare(
-            poco
+            Poco
             GIT_REPOSITORY https://github.com/pocoproject/poco.git
             GIT_TAG poco-1.10.1-release
         )

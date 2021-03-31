@@ -1,6 +1,7 @@
 #for vim
 *.swp
 compile_commands.json
+.cache/
 
 #for builds
 build/

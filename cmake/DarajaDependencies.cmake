@@ -1,3 +1,17 @@
+#Copyright 2021 Brian Orwe
+#
+#Licensed under the Apache License, Version 2.0 (the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License.
+
 include(FetchContent)
 
 macro(setup_catch2_tester)
@@ -39,13 +53,13 @@ macro(setup_poco_framework)
             set(ENABLE_ENCODINGS ON)
             set(ENABLE_NET ON)
             set(ENABLE_JSON ON)
+            set(ENABLE_UTIL ON)
             set(ENABLE_ENCODINGS_COMPILER OFF)
             set(ENABLE_XML OFF)
             set(ENABLE_MONGODB OFF)
             set(ENABLE_DATA_SQLITE OFF)
             set(ENABLE_REDIS OFF)
             set(ENABLE_PDF OFF)
-            set(ENABLE_UTIL OFF)
             set(ENABLE_SEVENZIP OFF)
             set(ENABLE_ZIP OFF)
             set(ENABLE_CPPPARSER OFF)

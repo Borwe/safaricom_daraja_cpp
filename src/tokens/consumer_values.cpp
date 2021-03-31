@@ -1,15 +1,23 @@
 #include <daraja/tokens/consumer_values.hpp>
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/AutoPtr.h>
+#include <Poco/Base64Encoder.h>
+#include <sstream>
 #include <string>
 
 using Poco::AutoPtr;
 using Poco::Util::PropertyFileConfiguration;
+using Poco::Base64Encoder;
 
 namespace Daraja{
     namespace tokens{
         ConsumerValues::ConsumerValues(std::string key,std::string secret)
             :m_key(key),m_secret(secret){
+            std::stringstream chained;
+            Base64Encoder base64encoder(chained);
+            std::string toEncode=key+":"+secret;
+            base64encoder<<toEncode.c_str();
+            this->base64d_keys_and_secret=chained.str();
         }
 
         ConsumerValues ConsumerValues::getConsumerValuesFromFile(std::string fileName){

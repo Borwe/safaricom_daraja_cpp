@@ -2,6 +2,7 @@
 *.swp
 compile_commands.json
 .cache/
+.clangd/
 
 #for builds
 build/

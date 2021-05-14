@@ -37,4 +37,6 @@ BOOST_AUTO_TEST_CASE(read_config_file){
                 
     BOOST_TEST(conf.getKey()=="Sc6hp1N9GYpOSGVeV7RzO0XJneHigr0D");
     BOOST_TEST(conf.getSecret()=="jkMYZcniJitOaCY4");
+    BOOST_TEST(conf.getbase64KeysAndSecret()
+            =="U2M2aHAxTjlHWXBPU0dWZVY3UnpPMFhKbmVIaWdyMEQ6amtNWVpjbmlKaXRPYUNZNA==");
 }

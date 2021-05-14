@@ -29,6 +29,7 @@ namespace Daraja{
 
             char chained [encodeSize];
             boost::beast::detail::base64::encode(chained,toEncode.c_str(),toEncode.size());
+            chained[encodeSize]='\0';
             this->base64d_keys_and_secret=chained;
         }
 

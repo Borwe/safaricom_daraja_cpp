@@ -40,3 +40,18 @@ BOOST_AUTO_TEST_CASE(read_config_file){
     BOOST_TEST(conf.getbase64KeysAndSecret()
             =="U2M2aHAxTjlHWXBPU0dWZVY3UnpPMFhKbmVIaWdyMEQ6amtNWVpjbmlKaXRPYUNZNA==");
 }
+
+BOOST_AUTO_TEST_CASE(create_access_token){
+    std::string testLocation(TEST_BUILD_DIR);
+    std::string confFileLoc=testLocation+"/test.properties";
+    Daraja::tokens::ConsumerValues conf=
+            Daraja::tokens::ConsumerValues::getConsumerValuesFromFile(confFileLoc);
+
+    Daraja::tokens::AccessGenerator access(conf);
+    std::string access_token=access.getAccessToken();
+    //sleep for 3 seconds and retry getting token which should be different
+    std::string access_token2=access.getAccessToken();
+    BOOST_TEST(access_token.empty()==false);
+    BOOST_TEST(access_token2.empty()==false);
+    BOOST_TEST(access_token!=access_token2);
+}

@@ -24,7 +24,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem thread)
 
 add_library(Daraja 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/consumer_values.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/consumer_values.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/generator.cpp)
 add_library(Daraja::Daraja ALIAS Daraja)
 target_include_directories(Daraja PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

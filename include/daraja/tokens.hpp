@@ -17,5 +17,6 @@
 #define DARAJA_TOKENS_CUSTOM
 
 #include <daraja/tokens/consumer_values.hpp>
+#include <daraja/tokens/generator.hpp>
 
 #endif

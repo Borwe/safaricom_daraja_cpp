@@ -12,14 +12,16 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-# setup catch2 deps
-setup_catch2_tester()
-
 enable_testing()
 
+set(Boost_USE_STATIC_LIBS OFF)
+find_package(Boost 1.73 REQUIRED unit_test_framework filesystem system)
+
 add_executable(token_api token_api.cpp)
-target_link_libraries(token_api PRIVATE Catch2::Catch2 PRIVATE Daraja)
-target_include_directories(token_api PRIVATE Catch2::Catch2 PRIVATE Daraja)
+target_link_libraries(token_api PRIVATE Daraja
+    Boost::filesystem
+    Boost::system
+    Boost::unit_test_framework)
 
 add_test(token_api token_api WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 

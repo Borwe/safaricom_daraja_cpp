@@ -42,6 +42,7 @@ namespace Daraja{
             static ConsumerValues getConsumerValuesFromFile(std::string file);
             const std::string getKey()const;
             const std::string getSecret()const;
+            const std::string getbase64KeysAndSecret()const;
         };
     }
 }

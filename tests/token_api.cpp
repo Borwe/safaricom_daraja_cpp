@@ -13,35 +13,28 @@
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "daraja/tokens/consumer_values.hpp"
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#define BOOST_TEST_MODULE TOKEN_API
+#define BOOST_TEST_DYN_LINK
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/test/tools/interface.hpp>
+#include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
+#include <cstring>
 #include <daraja/tokens.hpp>
 #ifndef TEST_BUILD_DIR
 #define TEST_BUILD_DIR "PLACE_HOLDER_FOR_CMAKE"
 #endif
-#include <fstream>
 
-TEST_CASE("Generate tokens","[tokens]"){
+BOOST_AUTO_TEST_CASE(read_config_file){
+    //Test if file exists
     std::string testLocation(TEST_BUILD_DIR);
     std::string confFileLoc=testLocation+"/test.properties";
-    int result=std::ifstream(confFileLoc.c_str()).good();
-    REQUIRE(result==1);
+    BOOST_TEST(boost::filesystem::exists(confFileLoc.c_str()));
 
-    GIVEN("Conf file at: "+confFileLoc){
-
-        Daraja::tokens::ConsumerValues conf=
-                Daraja::tokens::
-                    ConsumerValues::
-                    getConsumerValuesFromFile(confFileLoc);
-    }
-    
-    GIVEN("ConsumerValues Object"){
-
-    //const std::string key=conf.getKey();
-    //const std::string secret=conf.getSecret();
-    //std::cout<<"KEY: "<<key<<std::endl;
-    //std::cout<<"SECRET: "<<secret<<std::endl;
-    }
-
+    Daraja::tokens::ConsumerValues conf=
+            Daraja::tokens::ConsumerValues::getConsumerValuesFromFile(confFileLoc);
+                
+    BOOST_TEST(conf.getKey()=="Sc6hp1N9GYpOSGVeV7RzO0XJneHigr0D");
+    BOOST_TEST(conf.getSecret()=="jkMYZcniJitOaCY4");
 }

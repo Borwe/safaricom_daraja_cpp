@@ -13,35 +13,31 @@
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <boost/beast/core/detail/base64.hpp>
 #include <daraja/tokens/consumer_values.hpp>
-#include <Poco/Util/PropertyFileConfiguration.h>
-#include <Poco/AutoPtr.h>
-#include <Poco/Base64Encoder.h>
-#include <sstream>
 #include <string>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/beast.hpp>
 
-using Poco::AutoPtr;
-using Poco::Util::PropertyFileConfiguration;
-using Poco::Base64Encoder;
 
 namespace Daraja{
     namespace tokens{
         ConsumerValues::ConsumerValues(std::string key,std::string secret)
             :m_key(key),m_secret(secret){
-            std::stringstream chained;
-            Base64Encoder base64encoder(chained);
-            std::string toEncode=key+":"+secret;
-            base64encoder<<toEncode.c_str();
-            this->base64d_keys_and_secret=chained.str();
+            std::string toEncode=m_key+":"+m_secret;
+            size_t encodeSize=boost::beast::detail::base64::encoded_size(toEncode.size());
+
+            char chained [encodeSize];
+            boost::beast::detail::base64::encode(chained,toEncode.c_str(),toEncode.size());
+            this->base64d_keys_and_secret=chained;
         }
 
         ConsumerValues ConsumerValues::getConsumerValuesFromFile(std::string fileName){
-            AutoPtr<PropertyFileConfiguration> prop(new PropertyFileConfiguration);
-            prop->load(fileName);
-            std::string key=prop->getString("consumer_key");
-            std::string secret=prop->getString("consumer_secret");
+            boost::property_tree::ptree config;
+            boost::property_tree::ini_parser::read_ini(fileName,config);
+            std::string key=config.get<std::string>("consumer_key");
+            std::string secret=config.get<std::string>("consumer_secret");
             return ConsumerValues(key,secret);
-            
         }
 
         const std::string ConsumerValues::getKey()const{
@@ -50,6 +46,10 @@ namespace Daraja{
 
         const std::string ConsumerValues::getSecret()const{
             return m_secret;
+        }
+
+        const std::string ConsumerValues::getbase64KeysAndSecret()const{
+            return base64d_keys_and_secret;
         }
     }
 }

@@ -22,11 +22,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #get boost dependency, minimum version is 1.73
 find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem thread)
+set(Boost_USE_STATIC_LIBS ON)
 
 add_library(Daraja 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/consumer_values.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/generator.cpp)
 add_library(Daraja::Daraja ALIAS Daraja)
 target_include_directories(Daraja PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem PUBLIC Boost::thread)
 
 add_subdirectory(tests)

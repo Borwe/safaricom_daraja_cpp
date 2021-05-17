@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_CASE(read_config_file){
                 
     BOOST_TEST(conf.getKey()=="Sc6hp1N9GYpOSGVeV7RzO0XJneHigr0D");
     BOOST_TEST(conf.getSecret()=="jkMYZcniJitOaCY4");
+    BOOST_TEST(conf.getEndpoint()=="https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials");
     BOOST_TEST(conf.getbase64KeysAndSecret()
             =="U2M2aHAxTjlHWXBPU0dWZVY3UnpPMFhKbmVIaWdyMEQ6amtNWVpjbmlKaXRPYUNZNA==");
 }
@@ -47,10 +48,11 @@ BOOST_AUTO_TEST_CASE(create_access_token){
     Daraja::tokens::ConsumerValues conf=
             Daraja::tokens::ConsumerValues::getConsumerValuesFromFile(confFileLoc);
 
-    Daraja::tokens::AccessGenerator access(conf);
-    std::string access_token=access.getAccessToken();
+    Daraja::tokens::AccessGenerator access_async(conf,true);
+    access_async.start();
+    const std::string access_token=access_async.getAccessToken();
     //sleep for 3 seconds and retry getting token which should be different
-    std::string access_token2=access.getAccessToken();
+    const std::string access_token2=access_async.getAccessToken();
     BOOST_TEST(access_token.empty()==false);
     BOOST_TEST(access_token2.empty()==false);
     BOOST_TEST(access_token!=access_token2);

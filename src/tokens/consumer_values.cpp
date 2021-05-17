@@ -22,8 +22,8 @@
 
 namespace Daraja{
     namespace tokens{
-        ConsumerValues::ConsumerValues(std::string key,std::string secret)
-            :m_key(key),m_secret(secret){
+        ConsumerValues::ConsumerValues(std::string key,std::string secret,std::string endpoint)
+            :m_key(key),m_secret(secret),m_endpoint(endpoint){
             std::string toEncode=m_key+":"+m_secret;
             size_t encodeSize=boost::beast::detail::base64::encoded_size(toEncode.size());
 
@@ -38,7 +38,8 @@ namespace Daraja{
             boost::property_tree::ini_parser::read_ini(fileName,config);
             std::string key=config.get<std::string>("consumer_key");
             std::string secret=config.get<std::string>("consumer_secret");
-            return ConsumerValues(key,secret);
+            std::string endpoint=config.get<std::string>("token_endpoint");
+            return ConsumerValues(key,secret,endpoint);
         }
 
         const std::string ConsumerValues::getKey()const{
@@ -51,6 +52,10 @@ namespace Daraja{
 
         const std::string ConsumerValues::getbase64KeysAndSecret()const{
             return base64d_keys_and_secret;
+        }
+
+        const std::string ConsumerValues::getEndpoint()const{
+            return m_endpoint;
         }
     }
 }

@@ -26,10 +26,12 @@ namespace Daraja{
             //private variables
             std::string m_key;
             std::string m_secret;
+            std::string m_endpoint;
             std::string base64d_keys_and_secret;
         public:
 
-            ConsumerValues(std::string key,std::string secret);
+            ConsumerValues(std::string key,std::string secret
+                    ,std::string endpoint);
             ConsumerValues(const ConsumerValues &copy)=default;
             ConsumerValues(ConsumerValues &&move)=default;
             ConsumerValues &operator=(const ConsumerValues &copy)=default;
@@ -43,6 +45,7 @@ namespace Daraja{
             const std::string getKey()const;
             const std::string getSecret()const;
             const std::string getbase64KeysAndSecret()const;
+            const std::string getEndpoint()const;
         };
     }
 }

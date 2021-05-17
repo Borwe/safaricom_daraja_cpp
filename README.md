@@ -6,3 +6,4 @@
 - Boost Filesystem
 - Boost Beast
 - Boost System
+- Boost Thread

@@ -1,2 +1,8 @@
 ##### <u>STATUS --  in progress</u>
 
+<u>Current requirements:</u>
+
+- Boost Asio
+- Boost Filesystem
+- Boost Beast
+- Boost System

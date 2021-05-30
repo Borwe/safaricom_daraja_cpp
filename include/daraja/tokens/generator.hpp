@@ -3,11 +3,12 @@
 
 #include <daraja/tokens/consumer_values.hpp>
 #include <string>
+#include <daraja_export.h>
 
 namespace Daraja{
     namespace tokens{
 
-        class AccessGenerator{
+        class DARAJA_EXPORT AccessGenerator{
         private:
             //private variables
             ConsumerValues conf;

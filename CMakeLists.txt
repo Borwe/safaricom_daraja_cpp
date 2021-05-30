@@ -20,9 +20,13 @@ project(Daraja)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#get boost dependency, minimum version is 1.73
-find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem thread)
-set(Boost_USE_STATIC_LIBS ON)
+#set options to be used by user
+option(BUILD_SHARED_LIBS "Build Shared library" ON)
+option(Boost_USE_STATIC_LIBS "Use Boost Static" ON)
+
+
+#get boost dependency, minimum version is 1.70
+find_package(Boost 1.70 REQUIRED COMPONENTS system filesystem thread)
 
 add_library(Daraja 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/consumer_values.cpp
@@ -30,5 +34,14 @@ add_library(Daraja
 add_library(Daraja::Daraja ALIAS Daraja)
 target_include_directories(Daraja PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem PUBLIC Boost::thread)
+
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    include(GenerateExportHeader)
+    generate_export_header(Daraja EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/daraja_export.h)
+    target_include_directories(Daraja PUBLIC ${CMAKE_BINARY_DIR}/exports/)
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
 
 add_subdirectory(tests)

@@ -14,8 +14,7 @@
 
 enable_testing()
 
-set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost 1.73 REQUIRED unit_test_framework filesystem system)
+find_package(Boost 1.70 REQUIRED unit_test_framework filesystem system)
 
 add_executable(token_api token_api.cpp)
 target_link_libraries(token_api PRIVATE Daraja

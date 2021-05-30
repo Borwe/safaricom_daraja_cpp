@@ -17,11 +17,12 @@
 #define DARAJA_CONSUMER_VALUES_CUSTOM
 
 #include <string>
+#include <daraja_export.h>
 
 namespace Daraja{
     namespace tokens{
 
-        class ConsumerValues{
+        class DARAJA_EXPORT ConsumerValues{
         private:
             //private variables
             std::string m_key;
@@ -41,12 +42,26 @@ namespace Daraja{
             /**
              * Read consumer information from @file, secret and key
              */
-            static ConsumerValues getConsumerValuesFromFile(std::string file);
             const std::string getKey()const;
             const std::string getSecret()const;
             const std::string getbase64KeysAndSecret()const;
             const std::string getEndpoint()const;
         };
+
+        class DARAJA_EXPORT ConsumerBuilder{
+        private:
+            //private variables
+        public:
+            //public variables
+            ConsumerValues getConsumerValuesFromFile(std::string file) const;
+        
+            ConsumerBuilder()=default;
+            ConsumerBuilder(const ConsumerBuilder &copy)=default;
+            ConsumerBuilder(ConsumerBuilder &&move)=default;
+            ConsumerBuilder &operator=(ConsumerBuilder &&move)=default;
+            ~ConsumerBuilder()=default;
+        };
+
     }
 }
 

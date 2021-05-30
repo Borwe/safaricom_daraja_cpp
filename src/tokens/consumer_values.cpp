@@ -33,7 +33,7 @@ namespace Daraja{
             this->base64d_keys_and_secret=chained;
         }
 
-        ConsumerValues ConsumerValues::getConsumerValuesFromFile(std::string fileName){
+        ConsumerValues ConsumerBuilder::getConsumerValuesFromFile(std::string fileName) const{
             boost::property_tree::ptree config;
             boost::property_tree::ini_parser::read_ini(fileName,config);
             std::string key=config.get<std::string>("consumer_key");

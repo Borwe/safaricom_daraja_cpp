@@ -7,3 +7,8 @@
 - Boost Beast
 - Boost System
 - Boost Thread
+
+<u>Supported OS:</u>
+
+- Windows 10/ Server 
+- Linux

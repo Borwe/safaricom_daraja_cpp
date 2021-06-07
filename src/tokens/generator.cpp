@@ -17,7 +17,9 @@
 #include "boost/beast/http/read.hpp"
 #include "boost/beast/http/string_body.hpp"
 #include "boost/beast/ssl/ssl_stream.hpp"
+#include "boost/date_time/posix_time/posix_time_config.hpp"
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
+#include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/system/error_code.hpp"
 #include <boost/asio.hpp>
 #include <boost/utility/string_view_fwd.hpp>
@@ -93,11 +95,11 @@ namespace Daraja{
                                 &safaricom_tokens_getter::on_resolve,
                                 shared_from_this()));
                     m_io->run();
+                    std::thread([m_io=this->m_io](){m_io->run();}).detach();
                 }
 
                 void on_resolve(beast::error_code ec,
                         tcp::resolver::results_type results){
-                    std::cout<<"Running bitches\n";
                     if(ec){
                         fail(ec,"On resolve");
                         return;
@@ -139,7 +141,7 @@ namespace Daraja{
                         return;
                     }
 
-                    std::string authorization = "Basicasdasd " + m_conf.getbase64KeysAndSecret();
+                    std::string authorization = "Basic " + m_conf.getbase64KeysAndSecret();
                     m_request->set(http::field::authorization, authorization);
                     m_request->set(beast::http::field::content_type,
                             "application/json");
@@ -178,17 +180,26 @@ namespace Daraja{
                     //so retry again
                     if(m_response->result_int()!=200){
 
-                        std::cout<<"Redoing\n";
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
+                        shared<net::deadline_timer> t=
+                            std::make_shared<net::deadline_timer>(
+                                    net::make_strand(*m_io),
+                                    boost::posix_time::seconds(2));
+                        t->expires_from_now( );
 
-                        std::string body = m_response->body();
-                        std::cout<<body<<"\n";
-                        m_buffer.clear();
+                        t->async_wait([self=shared_from_this(),tm=t](beast::error_code ec){
 
-                        m_stream = std::make_shared<beast::ssl_stream<beast::tcp_stream>>(
-                                net::make_strand(*m_io),*m_ctx);
 
-                        run();
+                            std::string body = self->m_response->body();
+                            std::cout<<body<<"\n";
+                            self->m_buffer.clear();
+
+                            self->m_stream = 
+                                std::make_shared<beast::ssl_stream<beast::tcp_stream>>(
+                                net::make_strand(*(self->m_io)),*(self->m_ctx));
+
+                            self->run();
+                        });
+
                         return;
                     }
                     std::string body = m_response->body();

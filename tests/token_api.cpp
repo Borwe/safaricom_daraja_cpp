@@ -45,19 +45,38 @@ BOOST_AUTO_TEST_CASE(read_config_file){
             =="U2M2aHAxTjlHWXBPU0dWZVY3UnpPMFhKbmVIaWdyMEQ6amtNWVpjbmlKaXRPYUNZNA==");
 }
 
-BOOST_AUTO_TEST_CASE(create_access_token){
+BOOST_AUTO_TEST_CASE(create_access_token_non_async){
     std::string testLocation(TEST_BUILD_DIR);
     std::string confFileLoc=testLocation+"/test.properties";
     Daraja::tokens::ConsumerValues conf=
             Daraja::tokens::ConsumerBuilder().getConsumerValuesFromFile(confFileLoc);
 
-    Daraja::tokens::AccessGenerator access_async(conf,true);
-    access_async.start();
+    Daraja::tokens::AccessGenerator access_async(conf,false);
     const std::string access_token=access_async.getAccessToken();
     //sleep for 3 seconds and retry getting token which should be different
     const std::string access_token2=access_async.getAccessToken();
-    std::this_thread::sleep_for(std::chrono::minutes(5));
+    //std::this_thread::sleep_for(std::chrono::seconds(3));
     BOOST_TEST(access_token.empty()==false);
-    //BOOST_TEST(access_token2.empty()==false);
-    //BOOST_TEST(access_token!=access_token2);
+    BOOST_TEST(access_token2.empty()==false);
+    BOOST_TEST(access_token!=access_token2);
 }
+
+
+//BOOST_AUTO_TEST_CASE(create_access_token_async){
+//    std::string testLocation(TEST_BUILD_DIR);
+//    std::string confFileLoc=testLocation+"/test.properties";
+//    Daraja::tokens::ConsumerValues conf=
+//            Daraja::tokens::ConsumerBuilder().getConsumerValuesFromFile(confFileLoc);
+//
+//    Daraja::tokens::AccessGenerator access_async(conf,true);
+//    access_async.start();
+//    const std::string access_token=access_async.getAccessToken();
+//    //sleep for 3 seconds and retry getting token which should be different
+//    const std::string access_token2=access_async.getAccessToken();
+//    std::cout<<"TK1: "<<access_token<<"\n";
+//    std::cout<<"TK2: "<<access_token2<<"\n";
+//    //std::this_thread::sleep_for(std::chrono::seconds(3));
+//    BOOST_TEST(access_token.empty()==false);
+//    BOOST_TEST(access_token2.empty()==false);
+//    BOOST_TEST(access_token!=access_token2);
+//}

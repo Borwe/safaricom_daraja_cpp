@@ -35,7 +35,7 @@ add_library(Daraja
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/generator.cpp)
 add_library(Daraja::Daraja ALIAS Daraja)
 target_include_directories(Daraja PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem PUBLIC Boost::thread PRIVATE OpenSSL::SSL PRIVATE Boost::json)
+target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem PUBLIC Threads::Threads PRIVATE OpenSSL::SSL PRIVATE Boost::json)
 
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)

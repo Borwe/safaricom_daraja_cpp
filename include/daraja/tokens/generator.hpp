@@ -2,6 +2,7 @@
 #define DARA_TOKENS_GENERATOR_CUSTOM
 
 #include <daraja/tokens/consumer_values.hpp>
+#include <mutex>
 #include <string>
 #include <daraja_export.h>
 
@@ -13,17 +14,15 @@ namespace Daraja{
             //private variables
             ConsumerValues conf;
             bool doAsync;
+            std::string access_token;
         public:
             //public variables
+            std::mutex access_lock;
         
             AccessGenerator(const ConsumerValues &conf,bool asyncGenerate=false);
-            AccessGenerator(const AccessGenerator &copy)=default;
-            AccessGenerator(AccessGenerator &&move)=default;
-            AccessGenerator &operator=(const AccessGenerator &copy)=default;
-            AccessGenerator &operator=(AccessGenerator &&move)=default;
 
-            //TODO finish implementing this
-            const std::string getAccessToken() const;
+            const std::string getAccessToken() ;
+            void setAccessToken(std::string &token);
             // TODO finish it
             /**
              * If doAsync is set to true, then this initialize a loop
@@ -34,7 +33,7 @@ namespace Daraja{
              * as all the request will be done to get the access token when calling the 
              * AccessGenerator::getAccessToken() member function
              */
-            void start()const;
+            void start();
         };
     }
 }

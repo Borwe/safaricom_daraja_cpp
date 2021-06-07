@@ -20,8 +20,13 @@
 #include "boost/date_time/posix_time/posix_time_config.hpp"
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
 #include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/json/monotonic_resource.hpp"
+#include "boost/json/object.hpp"
+#include "boost/json/parse.hpp"
+#include "boost/json/value.hpp"
 #include "boost/system/error_code.hpp"
 #include <boost/asio.hpp>
+#include <boost/json/src.hpp>
 #include <boost/utility/string_view_fwd.hpp>
 #include <chrono>
 #include <cstddef>
@@ -31,6 +36,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <thread>
 #include <vcruntime.h>
 
@@ -57,10 +63,14 @@ namespace Daraja{
                 const ConsumerValues m_conf;
                 std::string m_address;
                 std::string m_port;
+                AccessGenerator *generator;
+                std::unique_lock<std::mutex> m_lock;
             public:
 
-                explicit safaricom_tokens_getter(const ConsumerValues &conf)
-                    :m_conf(conf),m_port("443"){
+                explicit safaricom_tokens_getter(AccessGenerator *generator,const ConsumerValues &conf)
+                    :m_conf(conf),m_port("443"),
+                    m_lock(generator->access_lock,std::defer_lock){
+                    this->generator=generator;
                     m_ctx = std::make_shared<net::ssl::context>(
                                 boost::asio::ssl::context::sslv23_client);
                     m_ctx->set_verify_mode(net::ssl::verify_none);
@@ -71,6 +81,8 @@ namespace Daraja{
                 }
 
                 void run(){
+                    //lock access lock here
+                    m_lock.lock();
                     //get url from endpoint
                     std::string host=m_conf.getEndpoint().substr(8);
                     int end_of_host=host.find_first_of("/");
@@ -95,7 +107,6 @@ namespace Daraja{
                                 &safaricom_tokens_getter::on_resolve,
                                 shared_from_this()));
                     m_io->run();
-                    std::thread([m_io=this->m_io](){m_io->run();}).detach();
                 }
 
                 void on_resolve(beast::error_code ec,
@@ -203,7 +214,14 @@ namespace Daraja{
                         return;
                     }
                     std::string body = m_response->body();
-                    std::cout<<body<<"\n";
+                    boost::json::value val = boost::json::parse(body);
+                    std::cout<<val.at("expires_in").as_string()<<"\n";
+
+                    std::string token_key = val.at("access_token").as_string()
+                        .c_str();
+                    std::cout<<token_key<<"\n";
+                    generator->setAccessToken(token_key);
+                    m_lock.unlock();
                 }
 
                 /***
@@ -219,13 +237,27 @@ namespace Daraja{
             conf(conf),doAsync(asyncGenerate){
         }
 
-        const std::string AccessGenerator::getAccessToken()const{
-            return "";
+        void AccessGenerator::setAccessToken(std::string &token){
+            this->access_token=token;
+        }
+
+        const std::string AccessGenerator::getAccessToken() {
+            if(this->doAsync==false){
+                std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+            }
+            std::lock_guard<std::mutex> m_l(access_lock);
+            return access_token;
         }
 
         //TODO this is just for tests, clean this function to do appropriate thing
-        void AccessGenerator::start()const{
-            std::make_shared<safaricom_tokens_getter>(this->conf)->run();
+        void AccessGenerator::start(){
+            if(this->doAsync==true){
+                std::thread([this](){
+                        std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+                }).detach();
+            }else{
+                std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+            }
         }
     }
 }

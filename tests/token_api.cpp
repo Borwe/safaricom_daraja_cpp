@@ -14,6 +14,7 @@
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "daraja/tokens/consumer_values.hpp"
+#include <iostream>
 #define BOOST_TEST_MODULE TOKEN_API
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -53,7 +54,7 @@ BOOST_AUTO_TEST_CASE(create_access_token){
     const std::string access_token=access_async.getAccessToken();
     //sleep for 3 seconds and retry getting token which should be different
     const std::string access_token2=access_async.getAccessToken();
-    //BOOST_TEST(access_token.empty()==false);
+    BOOST_TEST(access_token.empty()==false);
     //BOOST_TEST(access_token2.empty()==false);
     //BOOST_TEST(access_token!=access_token2);
 }

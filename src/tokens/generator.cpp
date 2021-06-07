@@ -2,6 +2,7 @@
 #include "boost/asio/io_context.hpp"
 #include "boost/asio/post.hpp"
 #include "boost/asio/ssl/context.hpp"
+#include "boost/asio/ssl/stream_base.hpp"
 #include "boost/asio/ssl/verify_mode.hpp"
 #include "boost/asio/steady_timer.hpp"
 #include "boost/beast/core/bind_handler.hpp"
@@ -109,6 +110,18 @@ namespace Daraja{
                                             &safaricom_tokens_getter::on_resolve,
                                             self->shared_from_this()));
                         });
+                        return;
+                    }
+
+                    m_stream.async_handshake(net::ssl::stream_base::client,
+                            beast::bind_front_handler(
+                                &safaricom_tokens_getter::on_handshake,
+                                shared_from_this()));
+                }
+
+                void on_handshake(beast::error_code ec){
+                    if(ec){
+                        fail(ec,"On Handshake");
                         return;
                     }
                     std::cout<<"YEAH!!!!!!\n";

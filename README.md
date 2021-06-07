@@ -2,6 +2,7 @@
 
 <u>Current requirements:</u>
 
+- OpenSSL
 - Boost Asio
 - Boost Filesystem
 - Boost Beast

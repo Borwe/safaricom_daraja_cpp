@@ -26,7 +26,7 @@ option(Boost_USE_STATIC_LIBS "Use Boost Static" ON)
 
 
 #get boost dependency, minimum version is 1.70
-find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem json thread)
+find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem json coroutine)
 #get openssl for use with daraja
 find_package(OpenSSL REQUIRED COMPONENTS SSL)
 
@@ -35,7 +35,9 @@ add_library(Daraja
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tokens/generator.cpp)
 add_library(Daraja::Daraja ALIAS Daraja)
 target_include_directories(Daraja PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem PUBLIC Threads::Threads PRIVATE OpenSSL::SSL PRIVATE Boost::json)
+target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem 
+    PUBLIC Threads::Threads PRIVATE OpenSSL::SSL 
+    PRIVATE Boost::json PRIVATE Boost::coroutine)
 
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)

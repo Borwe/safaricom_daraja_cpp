@@ -8,6 +8,8 @@
 
 - Boost Filesystem
 
+- Boost Coroutine2
+
 - Boost Beast
 
 - Boost System

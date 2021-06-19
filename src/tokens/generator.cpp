@@ -17,6 +17,8 @@
 #include "boost/beast/http/read.hpp"
 #include "boost/beast/http/string_body.hpp"
 #include "boost/beast/ssl/ssl_stream.hpp"
+#include "boost/coroutine2/coroutine.hpp"
+#include "boost/coroutine2/pooled_fixedsize_stack.hpp"
 #include "boost/date_time/posix_time/posix_time_config.hpp"
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
 #include "boost/date_time/posix_time/ptime.hpp"
@@ -33,12 +35,17 @@
 #include <daraja/tokens/generator.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/ssl.hpp>
+#include <boost/coroutine2/all.hpp>
 #include <exception>
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vcruntime.h>
+
+template<typename T>
+using shared = std::shared_ptr<T>;
 
 namespace Daraja{
     namespace tokens{
@@ -47,9 +54,11 @@ namespace Daraja{
         namespace http = beast::http;
         namespace net = boost::asio;
         using tcp = net::ip::tcp;
+        namespace cor2 = boost::coroutines2;
 
         template<typename T>
-        using shared = std::shared_ptr<T>;
+        using cor_t = cor2::coroutine<T>;
+
 
         class safaricom_tokens_getter:
             public std::enable_shared_from_this<safaricom_tokens_getter>{
@@ -63,12 +72,15 @@ namespace Daraja{
                 const ConsumerValues m_conf;
                 std::string m_address;
                 std::string m_port;
-                AccessGenerator *generator;
+                shared<cor_t<std::string>::push_type> m_pusher;
+                const bool m_is_async;
             public:
 
-                explicit safaricom_tokens_getter(AccessGenerator *generator,const ConsumerValues &conf)
-                    :m_conf(conf),m_port("443"){
-                    this->generator=generator;
+                explicit safaricom_tokens_getter(const bool async,
+                        shared< cor_t<std::string>::push_type > pusher
+                        ,const ConsumerValues &conf)
+                    :m_conf(conf),m_port("443"),m_is_async(async){
+                    m_pusher=pusher;
                     m_ctx = std::make_shared<net::ssl::context>(
                                 boost::asio::ssl::context::sslv23_client);
                     m_ctx->set_verify_mode(net::ssl::verify_none);
@@ -216,7 +228,10 @@ namespace Daraja{
                     std::string token_key = val.at("access_token").as_string()
                         .c_str();
                     std::cout<<token_key<<"\n";
-                    generator->setAccessToken(token_key);
+                    if( m_is_async==false ){
+                        (*m_pusher)(token_key);
+                        m_pusher = nullptr;
+                    }
                 }
 
                 /***
@@ -238,20 +253,32 @@ namespace Daraja{
 
         const std::string AccessGenerator::getAccessToken() {
             if(this->doAsync==false){
-                std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+                cor_t<std::string>::push_type pusher(
+                        [self=this](cor_t<std::string>::pull_type &puller){
+
+                    std::string access_token=puller.get();
+                    self->setAccessToken(access_token);
+                    puller();
+                });
+
+                shared< cor_t<std::string>::push_type > p_shared = 
+                    std::make_shared<cor_t<std::string>::push_type >
+                        (std::move(pusher));
+                std::make_shared<safaricom_tokens_getter>(doAsync,
+                        p_shared,conf)->run();
             }
             return access_token;
         }
 
         //TODO this is just for tests, clean this function to do appropriate thing
         void AccessGenerator::start(){
-            if(this->doAsync==true){
-                std::thread([this](){
-                        std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
-                }).detach();
-            }else{
-                std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
-            }
+            //if(this->doAsync==true){
+            //    std::thread([this](){
+            //            std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+            //    }).detach();
+            //}else{
+            //    std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+            //}
         }
     }
 }

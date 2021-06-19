@@ -55,7 +55,6 @@ BOOST_AUTO_TEST_CASE(create_access_token_non_async){
     const std::string access_token=access_async.getAccessToken();
     //sleep for 3 seconds and retry getting token which should be different
     const std::string access_token2=access_async.getAccessToken();
-    //std::this_thread::sleep_for(std::chrono::seconds(3));
     BOOST_TEST(access_token.empty()==false);
     BOOST_TEST(access_token2.empty()==false);
     BOOST_TEST(access_token!=access_token2);

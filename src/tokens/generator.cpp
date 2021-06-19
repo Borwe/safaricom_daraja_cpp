@@ -40,6 +40,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vcruntime.h>
@@ -272,13 +273,13 @@ namespace Daraja{
 
         //TODO this is just for tests, clean this function to do appropriate thing
         void AccessGenerator::start(){
-            //if(this->doAsync==true){
-            //    std::thread([this](){
-            //            std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
-            //    }).detach();
-            //}else{
-            //    std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
-            //}
+            if(this->doAsync==true){
+                //std::thread([this](){
+                //        std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
+                //}).detach();
+            }else{
+                throw std::runtime_error("Not allowed to call AccessGenerator::start() if doAsync is false");
+            }
         }
     }
 }

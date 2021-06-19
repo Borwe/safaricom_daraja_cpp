@@ -13,9 +13,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "boost/test/tools/old/interface.hpp"
 #include "daraja/tokens/consumer_values.hpp"
 #include <chrono>
 #include <iostream>
+#include <stdexcept>
 #include <thread>
 #define BOOST_TEST_MODULE TOKEN_API
 #include <boost/filesystem/operations.hpp>
@@ -58,6 +60,8 @@ BOOST_AUTO_TEST_CASE(create_access_token_non_async){
     BOOST_TEST(access_token.empty()==false);
     BOOST_TEST(access_token2.empty()==false);
     BOOST_TEST(access_token!=access_token2);
+
+    BOOST_REQUIRE_THROW(access_async.start(),std::runtime_error);
 }
 
 

@@ -40,7 +40,9 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <sstream>
 #include <stdexcept>
+#include <stdint.h>
 #include <string>
 #include <thread>
 #include <vcruntime.h>
@@ -60,6 +62,9 @@ namespace Daraja{
         template<typename T>
         using cor_t = cor2::coroutine<T>;
 
+
+        //for handling pull requests
+        std::vector<std::string> sh_tokens;
 
         class safaricom_tokens_getter:
             public std::enable_shared_from_this<safaricom_tokens_getter>{
@@ -224,14 +229,36 @@ namespace Daraja{
                     }
                     std::string body = m_response->body();
                     boost::json::value val = boost::json::parse(body);
-                    std::cout<<val.at("expires_in").as_string()<<"\n";
+                    std::stringstream reader;
+                    reader << val.at("expires_in").as_string().c_str();
+                    uint64_t wait_period = 0;
+                    reader >> wait_period;
 
                     std::string token_key = val.at("access_token").as_string()
                         .c_str();
-                    std::cout<<token_key<<"\n";
                     if( m_is_async==false ){
                         (*m_pusher)(token_key);
                         m_pusher = nullptr;
+                    }else{
+                        (*m_pusher)(token_key);
+                        shared<net::deadline_timer> t=
+                            std::make_shared<net::deadline_timer>(
+                                    net::make_strand(*m_io),
+                                    boost::posix_time::milliseconds(wait_period));
+                        t->expires_from_now( );
+                        t->async_wait([self=shared_from_this(),tm=t]
+                                (beast::error_code ec){
+
+                            self->m_buffer.clear();
+                            //clear vector
+                            sh_tokens.clear();
+
+                            self->m_stream = 
+                                std::make_shared<beast::ssl_stream<beast::tcp_stream>>(
+                                net::make_strand(*(self->m_io)),*(self->m_ctx));
+
+                            self->run();
+                        });
                     }
                 }
 
@@ -267,6 +294,11 @@ namespace Daraja{
                         (std::move(pusher));
                 std::make_shared<safaricom_tokens_getter>(doAsync,
                         p_shared,conf)->run();
+            }else{
+                while(sh_tokens.empty()){
+                }
+                auto val=sh_tokens.at(0);
+                return val;
             }
             return access_token;
         }
@@ -274,9 +306,26 @@ namespace Daraja{
         //TODO this is just for tests, clean this function to do appropriate thing
         void AccessGenerator::start(){
             if(this->doAsync==true){
-                //std::thread([this](){
-                //        std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
-                //}).detach();
+                cor_t<std::string>::push_type pusher( []
+                        (cor_t<std::string>::pull_type &puller){
+
+                        while(true){
+                            if(sh_tokens.empty() == false){
+                                sh_tokens.clear();
+                            }
+                            auto val=puller.get();
+                            sh_tokens.push_back(val);
+                            puller();
+                        }
+                });
+                shared< cor_t<std::string>::push_type > sh_pusher = 
+                    std::make_shared<cor_t<std::string>::push_type >
+                        (std::move(pusher));
+
+                std::thread([this,sh_pusher](){
+                        std::make_shared<safaricom_tokens_getter>(this->doAsync,
+                                sh_pusher,this->conf)->run();
+                }).detach();
             }else{
                 throw std::runtime_error("Not allowed to call AccessGenerator::start() if doAsync is false");
             }

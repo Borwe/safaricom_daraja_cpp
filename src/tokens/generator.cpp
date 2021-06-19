@@ -64,12 +64,10 @@ namespace Daraja{
                 std::string m_address;
                 std::string m_port;
                 AccessGenerator *generator;
-                std::unique_lock<std::mutex> m_lock;
             public:
 
                 explicit safaricom_tokens_getter(AccessGenerator *generator,const ConsumerValues &conf)
-                    :m_conf(conf),m_port("443"),
-                    m_lock(generator->access_lock,std::defer_lock){
+                    :m_conf(conf),m_port("443"){
                     this->generator=generator;
                     m_ctx = std::make_shared<net::ssl::context>(
                                 boost::asio::ssl::context::sslv23_client);
@@ -81,8 +79,6 @@ namespace Daraja{
                 }
 
                 void run(){
-                    //lock access lock here
-                    m_lock.lock();
                     //get url from endpoint
                     std::string host=m_conf.getEndpoint().substr(8);
                     int end_of_host=host.find_first_of("/");
@@ -221,7 +217,6 @@ namespace Daraja{
                         .c_str();
                     std::cout<<token_key<<"\n";
                     generator->setAccessToken(token_key);
-                    m_lock.unlock();
                 }
 
                 /***
@@ -245,7 +240,6 @@ namespace Daraja{
             if(this->doAsync==false){
                 std::make_shared<safaricom_tokens_getter>(this,this->conf)->run();
             }
-            std::lock_guard<std::mutex> m_l(access_lock);
             return access_token;
         }
 

@@ -16,9 +16,6 @@ namespace Daraja{
             bool doAsync;
             std::string access_token;
         public:
-            //public variables
-            std::mutex access_lock;
-        
             AccessGenerator(const ConsumerValues &conf,bool asyncGenerate=false);
 
             const std::string getAccessToken() ;

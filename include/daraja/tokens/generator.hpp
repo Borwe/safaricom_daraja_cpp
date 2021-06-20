@@ -24,7 +24,7 @@ namespace Daraja{
 
             const std::string getAccessToken() ;
             void setAccessToken(std::string &token);
-            // TODO finish it
+
             /**
              * If doAsync is set to true, then this initialize a loop
              * that keeps updating the access token information

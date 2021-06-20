@@ -283,7 +283,6 @@ namespace Daraja{
             return access_token;
         }
 
-        //TODO this is just for tests, clean this function to do appropriate thing
         void AccessGenerator::start(){
             if(this->doAsync==true){
                 cor_t<std::string>::push_type pusher( []

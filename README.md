@@ -22,3 +22,7 @@
 
 - Windows 10/ Server 
 - Linux
+
+<u>Parts Done:</u>
+
+- Generator for Token 

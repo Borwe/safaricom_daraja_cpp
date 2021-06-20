@@ -1,32 +1,4 @@
-#include "boost/asio/deadline_timer.hpp"
-#include "boost/asio/io_context.hpp"
-#include "boost/asio/post.hpp"
-#include "boost/asio/ssl/context.hpp"
-#include "boost/asio/ssl/stream_base.hpp"
-#include "boost/asio/ssl/verify_mode.hpp"
-#include "boost/asio/steady_timer.hpp"
-#include "boost/asio/strand.hpp"
-#include "boost/beast/core/bind_handler.hpp"
-#include "boost/beast/core/error.hpp"
-#include "boost/beast/core/stream_traits.hpp"
-#include "boost/beast/core/tcp_stream.hpp"
-#include "boost/beast/http/empty_body.hpp"
-#include "boost/beast/http/field.hpp"
-#include "boost/beast/http/fields.hpp"
-#include "boost/beast/http/message.hpp"
-#include "boost/beast/http/read.hpp"
-#include "boost/beast/http/string_body.hpp"
-#include "boost/beast/ssl/ssl_stream.hpp"
-#include "boost/coroutine2/coroutine.hpp"
-#include "boost/coroutine2/pooled_fixedsize_stack.hpp"
-#include "boost/date_time/posix_time/posix_time_config.hpp"
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
-#include "boost/date_time/posix_time/ptime.hpp"
-#include "boost/json/monotonic_resource.hpp"
-#include "boost/json/object.hpp"
-#include "boost/json/parse.hpp"
-#include "boost/json/value.hpp"
-#include "boost/system/error_code.hpp"
+#include "boost/date_time.hpp"
 #include <boost/asio.hpp>
 #include <boost/json/src.hpp>
 #include <boost/utility/string_view_fwd.hpp>
@@ -39,13 +11,11 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-#include <mutex>
 #include <sstream>
 #include <stdexcept>
 #include <stdint.h>
 #include <string>
 #include <thread>
-#include <vcruntime.h>
 
 template<typename T>
 using shared = std::shared_ptr<T>;
@@ -80,12 +50,15 @@ namespace Daraja{
                 std::string m_port;
                 shared<cor_t<std::string>::push_type> m_pusher;
                 const bool m_is_async;
+                bool &m_dont_ever_edit_keep_running;
             public:
 
                 explicit safaricom_tokens_getter(const bool async,
+                         bool &keep_running,
                         shared< cor_t<std::string>::push_type > pusher
                         ,const ConsumerValues &conf)
-                    :m_conf(conf),m_port("443"),m_is_async(async){
+                    :m_conf(conf),m_port("443"),m_is_async(async),
+                    m_dont_ever_edit_keep_running(keep_running){
                     m_pusher=pusher;
                     m_ctx = std::make_shared<net::ssl::context>(
                                 boost::asio::ssl::context::sslv23_client);
@@ -96,7 +69,18 @@ namespace Daraja{
                     m_resolver=std::make_shared<tcp::resolver>(*m_io);
                 }
 
+
                 void run(){
+                    //don't keep running if reached end of turn
+                    if(m_dont_ever_edit_keep_running==false){
+                        beast::error_code ec;
+                        m_stream->next_layer().socket()
+                            .shutdown(tcp::socket::shutdown_both,ec);
+                        if(m_io!=nullptr && !m_io->stopped()){
+                            m_io->stop();
+                        }
+                        return;
+                    }
                     //get url from endpoint
                     std::string host=m_conf.getEndpoint().substr(8);
                     int end_of_host=host.find_first_of("/");
@@ -127,6 +111,7 @@ namespace Daraja{
                         tcp::resolver::results_type results){
                     if(ec){
                         fail(ec,"On resolve");
+                        run();
                         return;
                     }
                     m_stream->next_layer()
@@ -146,10 +131,7 @@ namespace Daraja{
                                 *m_io, boost::posix_time::seconds(1));
                         t.async_wait([self=shared_from_this()]
                                 (boost::system::error_code ec){
-                                self->m_resolver->async_resolve(self->m_address,
-                                        self->m_port, beast::bind_front_handler(
-                                            &safaricom_tokens_getter::on_resolve,
-                                            self->shared_from_this()));
+                                self->run();
                         });
                         return;
                     }
@@ -272,7 +254,7 @@ namespace Daraja{
 
         AccessGenerator::AccessGenerator(const ConsumerValues &conf,
                 bool asyncGenerate):
-            conf(conf),doAsync(asyncGenerate){
+            conf(conf),doAsync(asyncGenerate),keep_running_async(true){
         }
 
         void AccessGenerator::setAccessToken(std::string &token){
@@ -281,19 +263,17 @@ namespace Daraja{
 
         const std::string AccessGenerator::getAccessToken() {
             if(this->doAsync==false){
-                cor_t<std::string>::push_type pusher(
-                        [self=this](cor_t<std::string>::pull_type &puller){
 
-                    std::string access_token=puller.get();
-                    self->setAccessToken(access_token);
-                    puller();
-                });
-
-                shared< cor_t<std::string>::push_type > p_shared = 
+                std::make_shared<safaricom_tokens_getter>(doAsync,keep_running_async,
                     std::make_shared<cor_t<std::string>::push_type >
-                        (std::move(pusher));
-                std::make_shared<safaricom_tokens_getter>(doAsync,
-                        p_shared,conf)->run();
+                            ([self=this](cor_t<std::string>::pull_type &puller){
+
+                        std::string access_token=puller.get();
+                        self->setAccessToken(access_token);
+                        puller();
+                    })
+                ,
+                conf)->run();
             }else{
                 while(sh_tokens.empty()){
                 }
@@ -322,12 +302,20 @@ namespace Daraja{
                     std::make_shared<cor_t<std::string>::push_type >
                         (std::move(pusher));
 
-                std::thread([this,sh_pusher](){
-                        std::make_shared<safaricom_tokens_getter>(this->doAsync,
-                                sh_pusher,this->conf)->run();
-                }).detach();
+                for_async_running=std::make_shared<std::thread>([this,sh_pusher](){
+                        std::make_shared<safaricom_tokens_getter>(this->doAsync
+                                ,this->keep_running_async,sh_pusher,this->conf)->run();
+                });
             }else{
                 throw std::runtime_error("Not allowed to call AccessGenerator::start() if doAsync is false");
+            }
+        }
+
+        AccessGenerator::~AccessGenerator(){
+            keep_running_async=false;
+            if(for_async_running!=nullptr){
+                if(for_async_running->joinable())
+                    for_async_running->join();
             }
         }
     }

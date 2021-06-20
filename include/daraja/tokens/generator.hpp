@@ -2,9 +2,10 @@
 #define DARA_TOKENS_GENERATOR_CUSTOM
 
 #include <daraja/tokens/consumer_values.hpp>
-#include <mutex>
+#include <memory>
 #include <string>
 #include <daraja_export.h>
+#include <thread>
 
 namespace Daraja{
     namespace tokens{
@@ -14,9 +15,12 @@ namespace Daraja{
             //private variables
             ConsumerValues conf;
             bool doAsync;
+            bool keep_running_async;
             std::string access_token;
+            std::shared_ptr<std::thread> for_async_running;
         public:
             AccessGenerator(const ConsumerValues &conf,bool asyncGenerate=false);
+            ~AccessGenerator();
 
             const std::string getAccessToken() ;
             void setAccessToken(std::string &token);

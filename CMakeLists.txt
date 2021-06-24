@@ -39,13 +39,11 @@ target_link_libraries(Daraja PRIVATE Boost::system Boost::filesystem
     PUBLIC Threads::Threads PRIVATE OpenSSL::SSL 
     PRIVATE Boost::json PRIVATE Boost::coroutine)
 
-if(WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    include(GenerateExportHeader)
-    generate_export_header(Daraja EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/daraja_export.h)
-    target_include_directories(Daraja PUBLIC ${CMAKE_BINARY_DIR}/exports/)
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-endif()
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+include(GenerateExportHeader)
+generate_export_header(Daraja EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/daraja_export.h)
+target_include_directories(Daraja PUBLIC ${CMAKE_BINARY_DIR}/exports/)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(tests)

@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_CASE(read_config_file){
     Daraja::tokens::ConsumerValues conf=
             Daraja::tokens::ConsumerBuilder().getConsumerValuesFromFile(confFileLoc);
                 
-    BOOST_TEST(conf.getKey()=="Sc6hp1N9GYpOSGVeV7RzO0XJneHigr0D");
-    BOOST_TEST(conf.getSecret()=="jkMYZcniJitOaCY4");
+    BOOST_TEST(conf.getKey()=="nBArpApiGCMoSzRjk9afRy1VJXfmZPfw");
+    BOOST_TEST(conf.getSecret()=="cCpW0YQZ8gIC6yGJ");
     BOOST_TEST(conf.getEndpoint()=="https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials");
     BOOST_TEST(conf.getbase64KeysAndSecret()
-            =="U2M2aHAxTjlHWXBPU0dWZVY3UnpPMFhKbmVIaWdyMEQ6amtNWVpjbmlKaXRPYUNZNA==");
+            =="bkJBcnBBcGlHQ01vU3pSams5YWZSeTFWSlhmbVpQZnc6Y0NwVzBZUVo4Z0lDNnlHSg==");
 }
 
 BOOST_AUTO_TEST_CASE(create_access_token_non_async){

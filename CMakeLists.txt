@@ -22,7 +22,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set options to be used by user
 option(BUILD_SHARED_LIBS "Build Shared library" ON)
-option(Boost_USE_STATIC_LIBS "Use Boost Static" ON)
+if( NOT BUILD_SHARED_LIBS)
+    set(Boost_USE_STATIC_LIBS ON)
+    message(STATUS NOT_SHARED)
+else()
+    set(Boost_USE_STATIC_LIBS OFF)
+    message(STATUS SHARED_YES)
+endif()
 
 
 #get boost dependency, minimum version is 1.70

@@ -16,13 +16,14 @@ enable_testing()
 
 find_package(Boost 1.75 REQUIRED unit_test_framework filesystem system)
 
-add_executable(token_api token_api.cpp)
-target_link_libraries(token_api PRIVATE Daraja::Configuration
+add_executable(configuration_api configuration_api.cpp)
+#add_executable(token_api token_api.cpp)
+target_link_libraries(configuration_api PRIVATE Daraja::Configuration
     Boost::filesystem
     Boost::system
     Boost::unit_test_framework)
 
-add_test(token_api token_api WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(configuration_api configuration_api WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.properties ${CMAKE_CURRENT_BINARY_DIR})
 

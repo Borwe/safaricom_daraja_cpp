@@ -13,7 +13,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "boost/test/tools/old/interface.hpp"
 #include "daraja/tokens/consumer_values.hpp"
 #include <chrono>
 #include <iostream>
@@ -27,25 +26,7 @@
 #include <boost/filesystem.hpp>
 #include <cstring>
 #include <daraja/tokens.hpp>
-#ifndef TEST_BUILD_DIR
-#define TEST_BUILD_DIR "PLACE_HOLDER_FOR_CMAKE"
-#endif
 
-BOOST_AUTO_TEST_CASE(read_config_file){
-    //Test if file exists
-    std::string testLocation(TEST_BUILD_DIR);
-    std::string confFileLoc=testLocation+"/test.properties";
-    BOOST_TEST(boost::filesystem::exists(confFileLoc.c_str()));
-
-    Daraja::tokens::ConsumerValues conf=
-            Daraja::tokens::ConsumerBuilder().getConsumerValuesFromFile(confFileLoc);
-                
-    BOOST_TEST(conf.getKey()=="nBArpApiGCMoSzRjk9afRy1VJXfmZPfw");
-    BOOST_TEST(conf.getSecret()=="cCpW0YQZ8gIC6yGJ");
-    BOOST_TEST(conf.getEndpoint()=="https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials");
-    BOOST_TEST(conf.getbase64KeysAndSecret()
-            =="bkJBcnBBcGlHQ01vU3pSams5YWZSeTFWSlhmbVpQZnc6Y0NwVzBZUVo4Z0lDNnlHSg==");
-}
 
 BOOST_AUTO_TEST_CASE(create_access_token_non_async){
     std::string testLocation(TEST_BUILD_DIR);

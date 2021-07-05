@@ -12,32 +12,32 @@
 #
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 cmake_minimum_required(VERSION 3.13)
 
-project(daraja)
+project(daraja_configuration LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(BoostSetup)
 
-option(BUILD_CONFIGURATION "Build Configuration module" ON)
-option(BUILD_TOKENS "Build Tokens module" ON)
+#get boost dependency, minimum version is 1.75
+find_package(Boost 1.75 REQUIRED COMPONENTS system filesystem json coroutine)
 
-if( BUILD_CONFIGURATION )
-    message(STATUS "Building Configuration")
-    add_subdirectory(Configuration)
-endif()
+add_library(daraja_configuration 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/consumer_values.cpp)
 
-if( BUILD_TOKENS )
-    set(BUILD_CONFIGURATION ON)
-    message(STATUS "Building Tokens")
-    add_subdirectory(Tokens)
-endif()
+add_library(Daraja::Configuration ALIAS daraja_configuration)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+include(GenerateExportHeader)
+generate_export_header(Daraja::Configuration 
+    EXPORT_FILE_NAME 
+    ${CMAKE_BINARY_DIR}/exports/configuration/daraja_configuration_export.h)
 
-#add_subdirectory(tests)
+target_include_directories(daraja_configuration 
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_BINARY_DIR}/exports/configuration)
+
+target_link_libraries(daraja_configuration 
+    PRIVATE Boost::system Boost::filesystem)
+
+

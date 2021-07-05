@@ -17,12 +17,12 @@
 #define DARAJA_CONSUMER_VALUES_CUSTOM
 
 #include <string>
-#include <daraja_export.h>
+#include <daraja_configuration_export.h>
 
 namespace Daraja{
     namespace tokens{
 
-        class DARAJA_EXPORT ConsumerValues{
+        class DARAJA__CONFIGURATION_EXPORT ConsumerValues{
         private:
             //private variables
             std::string m_key;
@@ -48,7 +48,7 @@ namespace Daraja{
             const std::string getEndpoint()const;
         };
 
-        class DARAJA_EXPORT ConsumerBuilder{
+        class DARAJA__CONFIGURATION_EXPORT ConsumerBuilder{
         private:
             //private variables
         public:

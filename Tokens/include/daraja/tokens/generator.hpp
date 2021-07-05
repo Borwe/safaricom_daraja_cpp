@@ -1,16 +1,16 @@
 #ifndef DARA_TOKENS_GENERATOR_CUSTOM
 #define DARA_TOKENS_GENERATOR_CUSTOM
 
-#include <daraja/tokens/consumer_values.hpp>
+#include <daraja/configuration/consumer_values.hpp>
 #include <memory>
 #include <string>
-#include <daraja_export.h>
+#include <daraja_tokens_export.h>
 #include <thread>
 
 namespace Daraja{
     namespace tokens{
 
-        class DARAJA_EXPORT AccessGenerator{
+        class DARAJA__TOKENS_EXPORT AccessGenerator{
         private:
             //private variables
             ConsumerValues conf;

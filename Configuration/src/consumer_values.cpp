@@ -14,7 +14,7 @@
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/beast/core/detail/base64.hpp>
-#include <daraja/tokens/consumer_values.hpp>
+#include <daraja/configuration/consumer_values.hpp>
 #include <string>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/beast.hpp>

@@ -25,4 +25,5 @@
 
 <u>Parts Done:</u>
 
+- Configuration, for grabbing user data
 - Generator for Token 

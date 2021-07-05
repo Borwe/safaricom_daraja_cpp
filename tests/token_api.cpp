@@ -13,19 +13,15 @@
 //You should have received a copy of the GNU General Public License
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "daraja/tokens/consumer_values.hpp"
+#define BOOST_TEST_MODULE TOKEN_API
+#include <boost/test/included/unit_test.hpp>
+#include "daraja/configuration/consumer_values.hpp"
+#include <daraja/tokens/generator.hpp>
 #include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <thread>
-#define BOOST_TEST_MODULE TOKEN_API
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/test/tools/interface.hpp>
-#include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
 #include <cstring>
-#include <daraja/tokens.hpp>
 
 
 BOOST_AUTO_TEST_CASE(create_access_token_non_async){
